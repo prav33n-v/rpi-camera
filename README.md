@@ -112,7 +112,7 @@ sudo systemctl restart smbd
 ### Run scripts for Arducam 16MP NoIR Camera module
 
 If you are using any other camera module then you do not need to run <b>install_pivariety_pkgs.sh</b>. If you are using the mentioned camera module then you can installl the same by following up the instructions from camera module manufacturer.
- - I have used a camera module with Sony IMX519 sensor for which documentation is availabe at [https://docs.arducam.com/Raspberry-Pi-Camera/Native-camera/5MP-OV5647/](https://docs.arducam.com/Raspberry-Pi-Camera/Native-camera/16MP-IMX519/#supported-platforms-and-os)
+ - I have used a camera module with Sony IMX519 sensor for which documentation is availabe at https://docs.arducam.com/Raspberry-Pi-Camera/Native-camera/16MP-IMX519/#supported-platforms-and-os
 ```
 chmod +x ./install_pivariety_pkgs.sh
 ./install_pivariety_pkgs.sh -p libcamera_dev
