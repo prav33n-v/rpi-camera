@@ -26,7 +26,6 @@ At the time of building this project, I have used Raspbian Pi OS (32bit) distro.
 sudo raspi-config
 ```
  -  Enable the following and save the settings :
-    -  Enable legacy camera support
     -  Enable SPI/I2C/1Wire
     -  Expand Filesystem
 
@@ -111,22 +110,20 @@ sudo systemctl restart smbd
 
 ### Run scripts for Arducam 16MP NoIR Camera module
 
-If you are using any other camera module then you do not need to run <b>install_pivariety_pkgs.sh</b>. If you are using the mentioned camera module then you can installl the same by following up the instructions from camera module manufacturer.
- - I have used a camera module with Sony IMX519 sensor for which documentation is availabe at https://docs.arducam.com/Raspberry-Pi-Camera/Native-camera/16MP-IMX519/#supported-platforms-and-os
-```
-chmod +x ./install_pivariety_pkgs.sh
-./install_pivariety_pkgs.sh -p libcamera_dev
-./install_pivariety_pkgs.sh -p libcamera_apps
-```
-
- - Add <b>dtoverlay=imx519</b> in the end of <b>/boot/firmware/config.txt</b> by switching to root user <b>sudo su</b> and executing below commands
-```
-echo " " >> /boot/firmware/config.txt
-echo "dtoverlay=imx519" >>  /boot/firmware/config.txt
-```
-
+If you are using any other camera module then you do not need to do this setup. If you are using the mentioned camera module then you can install the same by following up the instructions from camera module manufacturer.
+ - For this project, a camera module with Sony IMX519 sensor is used. The documentation is availabe at https://docs.arducam.com/Raspberry-Pi-Camera/Native-camera/16MP-IMX519/#supported-platforms-and-os
  - Reboot your raspberry pi.
  - Once your camera is connected correctly, run command <b>libcamera-still -o test.jpeg</b> to check if you are able to capture image. 
 
-### Install required dependencies
+### Display Setup
+
+For this project, 2 inch LCD display from Waveshare is used with resolution of 240x320. The documentation is available at https://www.waveshare.com/wiki/2inch_LCD_Module
+```
+sudo apt-get update
+sudo apt-get install python3-pip python3-pil python3-numpy
+sudo pip3 install spidev
+```
+ - In case of you get <b>error: externally-managed-environment</b> , run below command and the try running the above command again.
+```
+sudo mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.old
 ```
