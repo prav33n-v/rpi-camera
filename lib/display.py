@@ -69,8 +69,8 @@ def show_image(image):
 def draw_bar(image,value,background_color=GRAY,bar_fill_color=WHITE):
     draw = ImageDraw.Draw(image)
     # Draw a handy on-screen bar to show us the current brightness
-    bar_width = int((225 / 100.0) * value)
-    draw.rectangle((10,216,230,216), background_color)
+    bar_width = int((305 / 100.0) * value)
+    draw.rectangle((10,216,310,216), background_color)
     draw.rectangle((10,216,5+bar_width,216), bar_fill_color)
     # return the resulting image
     return image
@@ -99,7 +99,7 @@ def progress_bar(image_file,x,shoot_config,camera_config,background_color=GRAY,b
         draw.text((5,1),"BKT", fill = info_color,font = home_info)
         image_count = shoot_config["bkt_frame_count"]
     elif( shoot_config["shoot_mode"] == 3 ):              # mode 3 - timelapse stills
-        draw.text((5,1),"InT", fill = info_color,font = home_info)
+        draw.text((5,1),"INT", fill = info_color,font = home_info)
         image_count = shoot_config["tlp_frame_count"]
     elif( shoot_config["shoot_mode"] == 4 ):              # mode 4 - timelapse video
         draw.text((5,1),"TLV", fill = info_color,font = home_info)
@@ -110,9 +110,9 @@ def progress_bar(image_file,x,shoot_config,camera_config,background_color=GRAY,b
         draw.text((40,1),"JPG", fill = RED,font = home_info)
     draw.text((80,1),("ISO "+str(int(camera_config["analogue_gain"] * 100))), fill = MENU_TEXT,font = home_info)
     value = int(((x+1)/image_count)*100)
-    bar_width = int((225 / 100.0) * value)
+    bar_width = int((305 / 100.0) * value)
     draw.text((5,215),"Processing → "+str(x+1)+" / "+str(image_count), fill = YELLOW,font = home_info)
-    draw.rectangle((10,216,230,216), background_color)
+    draw.rectangle((10,216,310,216), background_color)
     draw.rectangle((10, 216,5+bar_width, 216), bar_fill_color)
     disp.ShowImage(new_image)
 
@@ -138,26 +138,26 @@ def menu_display(header,menu_item,display_config,bar_value=0):
     image=Image.new("RGB",(width,height),color='black')
     draw = ImageDraw.Draw(image)
 ################# Interface Buttons #########################
-    if(display_config["left"]):
-        draw.text((80,215),"<", fill = RED,font = menu_icon)
-    if(display_config["right"]):
-        draw.text((145,215),">",fill = RED,font = menu_icon)
-    if(display_config["down"]):
-        draw.text((5,215),"↓", fill = RED,font = menu_icon_large)
-    if(display_config["up"]):
-        draw.text((212,215),"↑", fill = RED,font = menu_icon_large)
+#    if(display_config["left"]):
+#        draw.text((80,215),"<", fill = RED,font = menu_icon)
+#    if(display_config["right"]):
+#        draw.text((145,215),">",fill = RED,font = menu_icon)
+#    if(display_config["down"]):
+#        draw.text((5,215),"↓", fill = RED,font = menu_icon_large)
+#    if(display_config["up"]):
+#        draw.text((212,215),"↑", fill = RED,font = menu_icon_large)
 #############################################################
     draw.text((0,5),header,fill = MENU_TITLE,font = menu_title)
     count = 0
     for item in menu_item:
         if(item_number == (count+1)):
-            draw.rectangle([(230,(36+(25*(count+1)))),(10,(36+(25*count)))],fill = MENU_SELECT)
+            draw.rectangle([(310,(36+(25*(count+1)))),(10,(36+(25*count)))],fill = MENU_SELECT)
             draw.text((15,(33+(25*count))),item,fill = BLACK,font = menu_line)
         else:
             draw.text((15,(33+(25*count))),item,fill = MENU_TEXT,font = menu_line)
         count += 1
     if(display_config["menu"] == 41):
-        st7789.display(draw_bar(image,display_config["brightness"]))
+        disp.ShowImage(draw_bar(image,display_config["brightness"]))
     elif(display_config["menu"] == 42):
         if(bar_value < 50):
             COLOR = GREEN
@@ -170,39 +170,41 @@ def menu_display(header,menu_item,display_config,bar_value=0):
 
 def camera_home(display_config,shoot_config,camera_config,preview_image):
     preview_image= preview_image.resize((288,216), resample=Image.BICUBIC)
+    outline=Image.new("RGB",(290,218),color='white')
+    outline.paste(preview_image,(1,1))
     image=Image.new("RGB",(width,height),color='black')
-    image.paste(preview_image,(16,24))
+    image.paste(outline,(0,22))
     draw = ImageDraw.Draw(image)
     info_color = MENU_TITLE
     if(camera_config["bnw"]):
         info_color = INFO
     if(camera_config["exposure"] == 0):
-        draw.text((165,1),exposure_time[camera_config["exposure"]],fill = MENU_TITLE, font = home_info)
+        draw.text((160,0),exposure_time[camera_config["exposure"]],fill = MENU_TITLE, font = home_info)
     else:
-        draw.text((165,1),exposure_time[camera_config["exposure"]],fill = MENU_TEXT, font = home_info)
+        draw.text((160,0),exposure_time[camera_config["exposure"]],fill = MENU_TEXT, font = home_info)
     if( shoot_config["shoot_mode"] == 1 ):                # mode 1 - stills
-        draw.text((5,1),"PIC", fill = info_color,font = home_info)
+        draw.text((0,0),"PIC", fill = info_color,font = home_info)
     elif( shoot_config["shoot_mode"] == 2 ):              # mode 2 - bracketing
-        draw.text((5,1),"BKT", fill = info_color,font = home_info)
+        draw.text((0,0),"BKT", fill = info_color,font = home_info)
     elif( shoot_config["shoot_mode"] == 3 ):              # mode 3 - timelapse stills
-        draw.text((5,1),"InT", fill = info_color,font = home_info)
+        draw.text((0,0),"INT", fill = info_color,font = home_info)
     elif( shoot_config["shoot_mode"] == 4 ):              # mode 4 - timelapse video
-        draw.text((5,1),"TLV", fill = info_color,font = home_info)
+        draw.text((0,0),"TLV", fill = info_color,font = home_info)
     if (camera_config["raw"]):
-        draw.text((40,1),"RAW", fill = INFO,font = home_info)
+        draw.text((35,0),"RAW", fill = INFO,font = home_info)
     else:
-        draw.text((40,1),"JPG", fill = RED,font = home_info)
-    draw.text((80,1),("ISO "+str(int(camera_config["analogue_gain"] * 100))), fill = MENU_TEXT,font = home_info)
-    if(display_config["left"]):
-        draw.text((80,215),"<", fill = RED,font = menu_icon)
-    if(display_config["right"]):
-        draw.text((145,215),">",fill = RED,font = menu_icon)
+        draw.text((35,0),"JPG", fill = RED,font = home_info)
+    draw.text((75,0),("ISO "+str(int(camera_config["analogue_gain"] * 100))), fill = MENU_TEXT,font = home_info)
+#    if(display_config["left"]):
+#        draw.text((80,215),"<", fill = RED,font = menu_icon)
+#    if(display_config["right"]):
+#        draw.text((145,215),">",fill = RED,font = menu_icon)
     disp.ShowImage(image)
 
 def menu_control(display_config,shoot_config,camera_config):
     menu = display_config.get("menu")
     if( menu >= 1 and menu <= 9):
-        items=["Camera Control","Shooting Mode","Image Settings","System Menu","Power Options"]
+        items=["Camera Control","Shooting Mode","Output Settings","System Menu","Power Options"]
         menu_display("Menu",items,display_config)
 
     elif( menu >= 11 and menu <= 19 ):        # Camera control settings
@@ -246,7 +248,7 @@ def menu_control(display_config,shoot_config,camera_config):
         menu_display("Shooting Mode",items,display_config)
 
     elif( menu >= 31 and menu <= 39 ):        # Image Setting Menu
-        items=["Size","Output","File","Status LED"]
+        items=["Size","Output","File","Sound"]
         items[0] = items[0] + " → " + str(image_h[camera_config["image_size"]]) +" X " + str(image_w[camera_config["image_size"]])
         if(camera_config["bnw"]):
             items[1] += " → B & W"
@@ -256,11 +258,11 @@ def menu_control(display_config,shoot_config,camera_config):
             items[2] += " → JPG + RAW"
         else:
             items[2] += " → JPG"
-        if(display_config["status_led"]):
+        if(display_config["sound"]):
             items[3] += " → On"
         else:
             items[3] += " → Off"
-        menu_display("Image Settings ",items,display_config)
+        menu_display("Output Settings ",items,display_config)
 
     elif( menu >= 41 and menu <= 49 ):        # System Menu
         items=["Screen Brightness","Disk","Wipe Data","Save Settings","Load Settings","Reset Settings"]
