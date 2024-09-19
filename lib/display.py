@@ -176,25 +176,38 @@ def camera_home(display_config,shoot_config,camera_config,preview_image):
     image.paste(outline,(0,22))
     draw = ImageDraw.Draw(image)
     info_color = MENU_TITLE
+#    draw.text((291,25),"SHR", fill = MENU_TEXT,font = home_info)
+    draw.text((291,26),("S"+str(int(camera_config["sharpness"]))), fill = MENU_TEXT,font = home_info)
+#    draw.text((291,70),"CTR", fill = MENU_TEXT,font = home_info)
+    draw.text((291,64),("C"+str(int(camera_config["contrast"]))), fill = MENU_TEXT,font = home_info)
+    if(display_config["sound"]):
+        draw.text((291,102),"SPK", fill = info_color,font = home_info)
+    else:
+        draw.text((291,102),"SPK", fill = RED,font = home_info)
     if(camera_config["bnw"]):
-        info_color = INFO
-    if(camera_config["exposure"] == 0):
-        draw.text((160,0),exposure_time[camera_config["exposure"]],fill = MENU_TITLE, font = home_info)
+        draw.text((291,140),"BNW", fill = INFO,font = home_info)
     else:
-        draw.text((160,0),exposure_time[camera_config["exposure"]],fill = MENU_TEXT, font = home_info)
+        draw.text((291,140),"CLR", fill = info_color,font = home_info)
     if( shoot_config["shoot_mode"] == 1 ):                # mode 1 - stills
-        draw.text((0,0),"PIC", fill = info_color,font = home_info)
+        draw.text((291,178),"PIC", fill = info_color,font = home_info)
     elif( shoot_config["shoot_mode"] == 2 ):              # mode 2 - bracketing
-        draw.text((0,0),"BKT", fill = info_color,font = home_info)
+        draw.text((291,178),"BKT", fill = info_color,font = home_info)
     elif( shoot_config["shoot_mode"] == 3 ):              # mode 3 - timelapse stills
-        draw.text((0,0),"INT", fill = info_color,font = home_info)
+        draw.text((291,178),"INT", fill = info_color,font = home_info)
     elif( shoot_config["shoot_mode"] == 4 ):              # mode 4 - timelapse video
-        draw.text((0,0),"TLV", fill = info_color,font = home_info)
+        draw.text((291,178),"TLV", fill = info_color,font = home_info)
     if (camera_config["raw"]):
-        draw.text((35,0),"RAW", fill = INFO,font = home_info)
+        draw.text((291,216),"RAW", fill = info_color,font = home_info)
     else:
-        draw.text((35,0),"JPG", fill = RED,font = home_info)
-    draw.text((75,0),("ISO "+str(int(camera_config["analogue_gain"] * 100))), fill = MENU_TEXT,font = home_info)
+        draw.text((291,216),"JPG", fill = INFO,font = home_info)
+    draw.text((0,0),("ISO "+str(int(camera_config["analogue_gain"] * 100))), fill = MENU_TEXT,font = home_info)
+    if(camera_config["exposure"] == 0):
+        draw.text((80,0),exposure_time[camera_config["exposure"]],fill = MENU_TITLE, font = home_info)
+    else:
+        draw.text((80,0),exposure_time[camera_config["exposure"]],fill = MENU_TEXT, font = home_info)
+    draw.text((160,0),(noise_reduction_mode[camera_config["noise_reduction"]]), fill = MENU_TEXT,font = home_info)
+    draw.text((240,0),(white_balance[camera_config["white_balance"]]), fill = MENU_TEXT,font = home_info)
+#    draw.text((260,0),("S "+str(camera_config["sharpness"])), fill = MENU_TEXT,font = home_info)
 #    if(display_config["left"]):
 #        draw.text((80,215),"<", fill = RED,font = menu_icon)
 #    if(display_config["right"]):

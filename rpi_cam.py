@@ -14,13 +14,13 @@ import lib.operations as operation
 LED = 17
 BUZZER = 9
 # Input
-UP=Button(13,hold_time=0.1)
-DOWN=Button(12,hold_time=0.1)
-LEFT=Button(16,hold_time=0.1)
-RIGHT=Button(19,hold_time=0.1)
-MENU=Button(26,hold_time=0.1)
-SHUTTER=Button(6,hold_time=0.1)
-BACK=Button(5,hold_time=0.1)
+UP=Button(13,hold_time=0.01)
+DOWN=Button(12,hold_time=0.01)
+LEFT=Button(16,hold_time=0.01)
+RIGHT=Button(19,hold_time=0.01)
+MENU=Button(26,hold_time=0.01)
+SHUTTER=Button(6,hold_time=0.01)
+BACK=Button(5,hold_time=0.01)
 
 GPIO.setwarnings(False)
 # Setup RPI.GPIO with "BCM" numbering scheme
@@ -58,20 +58,19 @@ def set_LED():
 def reset_LED():
     GPIO.output(LED, GPIO.LOW)
 
-def set_BUZZER():
+def buzz():
     GPIO.output(BUZZER, GPIO.HIGH)
-
-def reset_BUZZER():
+    time.sleep(0.1)
     GPIO.output(BUZZER, GPIO.LOW)
 
 def init(display_config,shoot_config,camera_config):
     backlight.start(1)
     set_LED()
-    set_BUZZER()
     lcd.boot_disp("start_logo.jpeg")
     camera.initialize_camera(camera_config)
-    reset_BUZZER()
     display_sleep(display_config["brightness"],False)
+    if(display_config["sound"]):
+        buzz()
     reset_LED()
 
 def end_program():
@@ -116,9 +115,7 @@ def key_input(input_value):
         display_config,shoot_config,camera_config = operation.shutter_button(display_config,shoot_config,camera_config)
         reset_LED()
         if(display_config["sound"]):
-            set_BUZZER()
-            time.sleep(0.1)
-            reset_BUZZER()
+            buzz()
 
 def input_handler(value):
     key_input(value)
