@@ -258,7 +258,11 @@ def shutter_button(display_config,shoot_config,camera_config):
                 os.mkdir(shoot_config["storage_path"] +"TimelapseMovie/")
             path = shoot_config["storage_path"]  + "TimelapseMovie/TLV_" + str(timestr)+"/"
             timelapse(display_config,shoot_config,camera_config,path)
-    lcd.menu_control(display_config,shoot_config,camera_config)
+        lcd.menu_control(display_config,shoot_config,camera_config)
+    else:
+        camera.initialize_camera(camera_config)
+        display_config["menu"] = 0
+        lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
     return display_config,shoot_config,camera_config
 
 def ok_menu_button(display_config,shoot_config,camera_config):
