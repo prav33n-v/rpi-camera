@@ -53,14 +53,16 @@ def display_sleep(brightness,sleep):
             time.sleep(0.01)
 
 def set_LED():
-    GPIO.output(LED, GPIO.HIGH)
+    if(display_config["status_led"]):
+        GPIO.output(LED, GPIO.HIGH)
 
 def reset_LED():
     GPIO.output(LED, GPIO.LOW)
 
 def buzz():
-    GPIO.output(BUZZER, GPIO.HIGH)
-    time.sleep(0.1)
+    if(display_config["sound"]):
+        GPIO.output(BUZZER, GPIO.HIGH)
+        time.sleep(0.1)
     GPIO.output(BUZZER, GPIO.LOW)
 
 def init(display_config,shoot_config,camera_config):
@@ -90,12 +92,12 @@ def key_input(input_value):
 
     elif(input_value == 4):                                                           # Left key being used as DECREMENT ( - )
         display_config,shoot_config,camera_config = operation.left_button(display_config,shoot_config,camera_config)
-        if(display_config["menu"] == 41):
+        if(display_config["menu"] == 31):
             backlight.ChangeDutyCycle(display_config["brightness"])
 
     elif(input_value == 5):                                                           # Right key being used as INCREMENT ( + )
         display_config,shoot_config,camera_config = operation.right_button(display_config,shoot_config,camera_config)
-        if(display_config["menu"] == 41):
+        if(display_config["menu"] == 31):
             backlight.ChangeDutyCycle(display_config["brightness"])
 
     elif(input_value == 3):                                                           # UP key
@@ -105,7 +107,7 @@ def key_input(input_value):
         if(display_config["menu"] == -1):
             display_sleep(display_config["brightness"],False)
         display_config,shoot_config,camera_config = operation.ok_menu_button(display_config,shoot_config,camera_config)
-        if(((display_config["menu"] > 40) and (display_config["menu"] < 50)) or ((display_config["menu"] > 4000) and (display_config["menu"] < 5000))):
+        if(((display_config["menu"] > 30) and (display_config["menu"] < 40)) or ((display_config["menu"] > 4000) and (display_config["menu"] < 5000))):
             backlight.ChangeDutyCycle(display_config["brightness"])
         if(display_config["menu"] == -2):
             display_config["menu"] = -1
@@ -114,8 +116,7 @@ def key_input(input_value):
         set_LED()
         display_config,shoot_config,camera_config = operation.shutter_button(display_config,shoot_config,camera_config)
         reset_LED()
-        if(display_config["sound"]):
-            buzz()
+        buzz()
 
 def input_handler(value):
     key_input(value)

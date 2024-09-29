@@ -112,10 +112,9 @@ def bracketing(display_config,shoot_config,camera_config,path):
     for x in range(shoot_config["bkt_frame_count"]):
         image_filename=path+"BKT_"+str(x)
         camera_config["exposure"] = exposure_value + x
-        print(camera_config)
         camera.initialize_camera(camera_config)
         camera.shoot(camera_config,image_filename)
-        lcd.progress_bar(image_filename+".jpg",x,shoot_config,camera_config)
+        lcd.progress_bar(image_filename+".jpg",x,shoot_config,camera_configi,display_config)
     camera_config["exposure"] = original_exposure_value
     camera.initialize_camera(camera_config)
     lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
@@ -126,7 +125,7 @@ def interval_timer(display_config,shoot_config,camera_config,path):
         image_filename=path+"InT_"+str(x)
         camera.shoot(camera_config,image_filename)
         time.sleep(shoot_config["tlp_interval"])
-        lcd.progress_bar(image_filename+".jpg",x,shoot_config,camera_config)
+        lcd.progress_bar(image_filename+".jpg",x,shoot_config,camera_config,display_config)
     lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
 
 def timelapse(display_config,shoot_config,camera_config,path):
@@ -135,7 +134,7 @@ def timelapse(display_config,shoot_config,camera_config,path):
         image_filename=path+"TLV_"+str(x)
         camera.shoot(camera_config,image_filename)
         time.sleep(shoot_config["tlv_interval"])
-        lcd.progress_bar(image_filename+".jpg",x,shoot_config,camera_config)
+        lcd.progress_bar(image_filename+".jpg",x,shoot_config,camera_config,display_config)
     lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
     
 def poweroff(display_config,shoot_config,camera_config):
@@ -259,6 +258,8 @@ def shutter_button(display_config,shoot_config,camera_config):
             path = shoot_config["storage_path"]  + "TimelapseMovie/TLV_" + str(timestr)+"/"
             timelapse(display_config,shoot_config,camera_config,path)
         lcd.menu_control(display_config,shoot_config,camera_config)
+    elif((display_config["menu"] == -2) or (display_config["menu"] == -1)):
+        pass
     else:
         camera.initialize_camera(camera_config)
         display_config["menu"] = 0
@@ -379,12 +380,12 @@ def down_button(display_config,shoot_config,camera_config):
         if(display_config["menu"] >= 1 and display_config["menu"] <=9):         # Main menu page
             display_config["menu"] = down(display_config["menu"],1,5) 
         elif(display_config["menu"] >= 11 and display_config["menu"] <=19):     # Camera settings page
-            display_config["menu"] = down(display_config["menu"],11,16) 
+            display_config["menu"] = down(display_config["menu"],11,18) 
         elif(display_config["menu"] >= 21 and display_config["menu"] <=29):     # Shooting mode page
             display_config["menu"] = down(display_config["menu"],21,24) 
             shoot_config["shoot_mode"] = display_config["menu"] % 10
-        elif(display_config["menu"] >= 31 and display_config["menu"] <=39):     # Image settings page
-            display_config["menu"] = down(display_config["menu"],31,34)
+        elif(display_config["menu"] >= 31 and display_config["menu"] <=39):     # Interface settings page
+            display_config["menu"] = down(display_config["menu"],31,33)
         elif(display_config["menu"] >= 231 and display_config["menu"] <=239):   # Timelapse photo submenu
             display_config["menu"] = down(display_config["menu"],234,235) 
             if(display_config["menu"] == 234):
@@ -428,12 +429,12 @@ def up_button(display_config,shoot_config,camera_config):
         if(display_config["menu"] >= 1 and display_config["menu"] <=9):       # Main menu page
             display_config["menu"] = up(display_config["menu"],1,5) 
         elif(display_config["menu"] >= 11 and display_config["menu"] <=19):     # Camera settings page
-            display_config["menu"] = up(display_config["menu"],11,16) 
+            display_config["menu"] = up(display_config["menu"],11,18) 
         elif(display_config["menu"] >= 21 and display_config["menu"] <=29):     # Shooting mode page
             display_config["menu"] = up(display_config["menu"],21,24) 
             shoot_config["shoot_mode"] = display_config["menu"] % 10
-        elif(display_config["menu"] >= 31 and display_config["menu"] <=39):     # Image settings page
-            display_config["menu"] = up(display_config["menu"],31,34)
+        elif(display_config["menu"] >= 31 and display_config["menu"] <=39):     # Output settings page
+            display_config["menu"] = up(display_config["menu"],31,33)
         elif(display_config["menu"] >= 231 and display_config["menu"] <=239):   # Timelapse photo submenu
             display_config["menu"] = up(display_config["menu"],234,235)
             if(display_config["menu"] == 234):
@@ -476,7 +477,7 @@ def left_button(display_config,shoot_config,camera_config):
             display_config["left"],display_config["right"] = check_left_right(camera_config["exposure"],min_exposure,max_exposure,0)
         lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
     else:
-        if(display_config["menu"] == 41):                                       # Brightness decrease
+        if(display_config["menu"] == 31):                                       # Brightness decrease
             if(display_config["brightness"] > 5):
                 display_config["brightness"] = decrement(display_config["brightness"],5)
                 display_config["left"],display_config["right"] = check_left_right(display_config["brightness"],5,100,2)
@@ -529,16 +530,18 @@ def left_button(display_config,shoot_config,camera_config):
             if(shoot_config["tlv_interval"] > shoot_config["min_interval"]):
                 shoot_config["tlv_interval"] = decrement(shoot_config["tlv_interval"],1)
                 display_config["left"],display_config["right"] = check_left_right(shoot_config["tlv_interval"],shoot_config["min_interval"],shoot_config["max_interval"],0)
-        elif(display_config["menu"] == 31):
+        elif(display_config["menu"] == 18):
             if(camera_config["image_size"] > camera_config["min_image_size"]):
                 camera_config["image_size"] = decrement(camera_config["image_size"],1)
                 display_config["left"],display_config["right"] = check_left_right(camera_config["image_size"],camera_config["min_image_size"],camera_config["max_image_size"],0)
-        elif(display_config["menu"] == 32):                                     # Toggle bnw
+        elif(display_config["menu"] == 17):                                     # Toggle bnw
             camera_config["bnw"] = not camera_config["bnw"]
-        elif(display_config["menu"] == 33):                                     # Toggle raw
+        elif(display_config["menu"] == 41):                                     # Toggle raw
             camera_config["raw"] = not camera_config["raw"]
-        elif(display_config["menu"] == 34):                                     # Toggle status led
+        elif(display_config["menu"] == 32):                                     # Toggle sound
             display_config["sound"] = not display_config["sound"]
+        elif(display_config["menu"] == 33):                                     # Toggle status led
+            display_config["status_led"] = not display_config["status_led"]
         lcd.menu_control(display_config,shoot_config,camera_config)
     return display_config,shoot_config,camera_config
 
@@ -553,7 +556,7 @@ def right_button(display_config,shoot_config,camera_config):
             display_config["left"],display_config["right"] = check_left_right(camera_config["exposure"],min_exposure,max_exposure,0)
         lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
     else:
-        if(display_config["menu"] == 41):
+        if(display_config["menu"] == 31):
             if(display_config["brightness"] < 100):
                 display_config["brightness"] = increment(display_config["brightness"],5)
                 display_config["left"],display_config["right"] = check_left_right(display_config["brightness"],5,100,2)
@@ -606,19 +609,17 @@ def right_button(display_config,shoot_config,camera_config):
             if(shoot_config["tlv_interval"] < shoot_config["max_interval"]):
                 shoot_config["tlv_interval"] = increment(shoot_config["tlv_interval"],1)
                 display_config["left"],display_config["right"] = check_left_right(shoot_config["tlv_interval"],shoot_config["min_interval"],shoot_config["max_interval"],0)
-        elif(display_config["menu"] == 31):
+        elif(display_config["menu"] == 18):
             if(camera_config["image_size"] < camera_config["max_image_size"]):
                camera_config["image_size"] = increment(camera_config["image_size"],1)
                display_config["left"],display_config["right"] = check_left_right(camera_config["image_size"],camera_config["min_image_size"],camera_config["max_image_size"],0)
-        elif(display_config["menu"] == 32):                                     # Toggle bnw
+        elif(display_config["menu"] == 17):                                     # Toggle bnw
             camera_config["bnw"] = not camera_config["bnw"]
-        elif(display_config["menu"] == 33):                                     # Toggle raw
+        elif(display_config["menu"] == 41):                                     # Toggle raw
             camera_config["raw"] = not camera_config["raw"]
-        elif(display_config["menu"] == 34):                                     # Toggle status led
+        elif(display_config["menu"] == 32):                                     # Toggle sound
             display_config["sound"] = not display_config["sound"]
+        elif(display_config["menu"] == 33):                                     # Toggle status led
+            display_config["status_led"] = not display_config["status_led"]
         lcd.menu_control(display_config,shoot_config,camera_config)
     return display_config,shoot_config,camera_config
-
-def menu_fn_button(display_config,shoot_config,camera_config):
-    return display_config,shoot_config,camera_config
-

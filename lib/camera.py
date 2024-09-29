@@ -12,10 +12,8 @@ image_width=[1200,1536,1632,2000,2448,2592,2800,3496]
 def initialize_camera(camera_config):
     picam2.stop()
     configuration = picam2.create_still_configuration(raw={}, main={"size": (image_height[camera_config["image_size"]], image_width[camera_config["image_size"]])}, lores={"size": (640, 480)}, display=None,queue=False)
-    #configuration = picam2.create_still_configuration(raw={}, main={"size": (image_height[camera_config["image_size"]], image_width[camera_config["image_size"]])}, queue=False)
-    # camera_config = picam2.create_still_configuration( main={"size": (img_h, img_w)}, lores={"size": (640, 480)}, display=None, raw=picam2.sensor_modes[4],queue=False)
     # Setting up image quality to highest
-#    picam2.options['quality'] = 100  # values from 0 to 100
+    picam2.options['quality'] = 100  # values from 0 to 100
     # Configure camera as per above parameters
     picam2.configure(configuration)
     # Initialize camera
