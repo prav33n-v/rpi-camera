@@ -71,8 +71,7 @@ def init(display_config,shoot_config,camera_config):
     lcd.boot_disp("start_logo.jpeg")
     camera.initialize_camera(camera_config)
     display_sleep(display_config["brightness"],False)
-    if(display_config["sound"]):
-        buzz()
+    buzz()
     reset_LED()
 
 def end_program():

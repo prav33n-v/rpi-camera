@@ -43,7 +43,7 @@ INFO=(200,200,175)
 WHITE=(255,255,255)
 YELLOW=(255,255,0)
 MENU_SELECT=(200,200,200)
-MENU_TEXT=(10,200,200)
+MENU_TEXT=(250,250,120)
 MENU_TITLE=(128,255,10)
 
 # Path for fonts
@@ -146,7 +146,7 @@ def progress_bar(image_file,x,shoot_config,camera_config,display_config,backgrou
     wpercent = (basewidth/float(image.size[0]))
     hsize = int((float(image.size[1])*float(wpercent)))
     preview_image= image.resize((288,216), resample=Image.BICUBIC)
-    outline=Image.new("RGB",(319,240),color='blue')
+    outline=Image.new("RGB",(319,240),color='red')
     outline.paste(preview_image,(1,23))
     image=Image.new("RGB",(width,height),color='black')
     image.paste(outline,(0,0))
@@ -171,7 +171,7 @@ def progress_bar(image_file,x,shoot_config,camera_config,display_config,backgrou
         image.paste(get_icon("nr",GREEN,camera_config),(290,85))
     if(display_config["sound"]):
         image.paste(get_icon("sound",RED,camera_config),(290,210))
-    draw.rectangle((290,22,317,22), 'blue')
+    draw.rectangle((290,22,317,22), 'red')
     draw.rectangle((1,1,317,21), BLACK)
     draw.rectangle((1,1,70,21), GRAY)
     draw.text((0,0),("ISO "+str(int(camera_config["analogue_gain"] * 100))), fill = MENU_TEXT,font = home_info)
@@ -191,10 +191,10 @@ def progress_bar(image_file,x,shoot_config,camera_config,display_config,backgrou
     draw.text((275,0),("S "+str(float(camera_config["sharpness"]))), fill = MENU_TEXT,font = home_info)
     draw.text((5,215),"Processing → "+str(x+1)+" / "+str(image_count), fill = YELLOW,font = home_info)
 
-    value = int(((x)/image_count)*100)
-    bar_height = int(24+((200 / 100.0) * (100-value)))
-    draw.rectangle((319,23,319,240), background_color)
-    draw.rectangle((319,bar_height+5,319,240), bar_fill_color)
+    value = int(((x+1)/image_count)*100)
+    bar_width = int((278 / 100.0) * value)
+    draw.rectangle((5,216,283,216), background_color)
+    draw.rectangle((5,216,5+bar_width,216), bar_fill_color)
     disp.ShowImage(image)
 
 #############################################################################
@@ -241,13 +241,13 @@ def menu_display(header,menu_item,display_config,bar_value=0):
 
 def camera_home(display_config,shoot_config,camera_config,preview_image):
     preview_image= preview_image.resize((288,216), resample=Image.BICUBIC)
-    outline=Image.new("RGB",(319,240),color='blue')
+    outline=Image.new("RGB",(319,240),color='white')
     outline.paste(preview_image,(1,23))
     image=Image.new("RGB",(width,height),color='black')
     image.paste(outline,(0,0))
     draw = ImageDraw.Draw(image)
     info_color = MENU_TITLE
-    draw.rectangle((290,23,316,238), GRAY)
+    draw.rectangle((290,23,317,238), GRAY)
     if(camera_config["bnw"]):
         image.paste(get_icon("bnw",BLACK,camera_config),(290,25))
     else:
@@ -264,7 +264,7 @@ def camera_home(display_config,shoot_config,camera_config,preview_image):
         image.paste(get_icon("nr",GREEN,camera_config),(290,85))
     if(display_config["sound"]):
         image.paste(get_icon("sound",RED,camera_config),(290,210))
-    draw.rectangle((290,22,317,22), 'blue')
+    draw.rectangle((290,22,317,22), 'white')
     draw.rectangle((1,1,317,21), BLACK)
     draw.rectangle((1,1,70,21), GRAY)
     draw.text((2,0),("ISO "+str(int(camera_config["analogue_gain"] * 100))), fill = MENU_TEXT,font = home_info)
