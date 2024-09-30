@@ -95,8 +95,9 @@ def reboot(display_config,shoot_config,camera_config):
     display_config["menu"] = 5114
     lcd.menu_control(display_config,shoot_config,camera_config)
     lcd.boot_disp("camera_down_logo.jpeg")
+    time.sleep(1)
     os.system("sudo reboot")
-    time.sleep(5)
+    time.sleep(0.5)
     
 def single_shot(display_config,shoot_config,camera_config,path):
     timestr = time.strftime("%Y%m%d-%H%M%S")
@@ -114,7 +115,7 @@ def bracketing(display_config,shoot_config,camera_config,path):
         camera_config["exposure"] = exposure_value + x
         camera.initialize_camera(camera_config)
         camera.shoot(camera_config,image_filename)
-        lcd.progress_bar(image_filename+".jpg",x,shoot_config,camera_configi,display_config)
+        lcd.progress_bar(image_filename+".jpg",x,shoot_config,camera_config,display_config)
     camera_config["exposure"] = original_exposure_value
     camera.initialize_camera(camera_config)
     lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
@@ -147,8 +148,9 @@ def poweroff(display_config,shoot_config,camera_config):
     display_config["menu"] = 5225
     lcd.menu_control(display_config,shoot_config,camera_config)
     lcd.boot_disp("camera_down_logo.jpeg")
+    time.sleep(1)
     os.system("sudo poweroff")
-    time.sleep(5)
+    time.sleep(0.5)
 
     
 def back_button(display_config,shoot_config,camera_config):

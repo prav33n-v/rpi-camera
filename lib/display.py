@@ -284,8 +284,23 @@ def camera_home(display_config,shoot_config,camera_config,preview_image):
     draw.text((275,0),("S "+str(float(camera_config["sharpness"]))), fill = MENU_TEXT,font = home_info)
     disp.ShowImage(image)
 
+def get_disk_usage(shoot_config):
+    # Disk space usage infod
+    memory=shutil.disk_usage(shoot_config["storage_path"])
+    usage=int((memory[1]/memory[0])*100)
+    used=(memory[1]/1024)
+    total=(memory[0]/1024)/1024
+    if(used > 0 and used < 1024):
+        value = str(round(used,2)) + "k /" + str(round((total/1024),2)) + "g"
+    elif(used >= 1024 and used < 1048576): # and used < 1073741824):
+        value = str(round((used/1024),2)) + "m /" + str(round((total/1024),2)) + "g"
+    else:
+        value = str(round(((used/1024)/1024),2)) + "g /" + str(round((total/1024),2)) + "g"
+    return value,usage
+
 def menu_control(display_config,shoot_config,camera_config):
     menu = display_config.get("menu")
+    value,usage = get_disk_usage(shoot_config)
     if( menu >= 1 and menu <= 9):
         items=["Camera Control","Shooting Mode","UI Menu","System Menu","Power Options"]
         menu_display("Menu",items,display_config)
@@ -349,64 +364,75 @@ def menu_control(display_config,shoot_config,camera_config):
         menu_display("UI Menu",items,display_config)
 
     elif( menu >= 41 and menu <= 49 ):        # System Menu
-        items=["Output File","Disk","Wipe Data","Save Settings","Load Settings","Reset Settings"]
+        items=["Output File → JPG","Disk","Wipe Data","Save Settings","Load Settings","Reset Settings"]
         if(camera_config["raw"]):
-            items[0] += " → JPG + RAW"
-        else:
-            items[0] += " → JPG"
-        # Disk space usage info
-        memory=shutil.disk_usage(shoot_config["storage_path"])
-        usage=int((memory[1]/memory[0])*100)
-        used=(memory[1]/1024)
-        total=(memory[0]/1024)/1024
-        if(used > 0 and used < 1024):
-            value = str(round(used,2)) + "k /" + str(round((total/1024),2)) + "g"
-        elif(used >= 1024 and used < 1048576): # and used < 1073741824):
-            value = str(round((used/1024),2)) + "m /" + str(round((total/1024),2)) + "g"
-        else:
-            value = str(round(((used/1024)/1024),2)) + "g /" + str(round((total/1024),2)) + "g"
+            items[0] += " + RAW"
         items[1] = items[1] + " → " + value
         menu_display("System Menu",items,display_config,usage)
 
     elif( menu == 433 ):                            # Wipe data
-        items=["Output File","Disk","Wipe Data → Sure ?","Save Settings","Load Settings","Reset Settings"]
+        items=["Output File → JPG","Disk","Wipe Data → Sure ?","Save Settings","Load Settings","Reset Settings"]
+        if(camera_config["raw"]):
+            items[0] += " + RAW"
+        items[1] = items[1] + " → " + value
         menu_display("System Menu",items,display_config)
 
     elif( menu == 4333 ):                           # Wipe data confirmation
-        items=["Output File","Disk","Wipe Data → Done !","Save Settings","Load Settings","Reset Settings"]
+        items=["Output File → JPG","Disk","Wipe Data → Done !","Save Settings","Load Settings","Reset Settings"]
+        if(camera_config["raw"]):
+            items[0] += " + RAW"
+        items[1] = items[1] + " → " + value
         menu_display("System Menu",items,display_config)
         time.sleep(1)
         items[2] = "Wipe Data"
         menu_display("System Menu",items,display_config)
 
     elif( menu == 444 ):                            # Save settings
-        items=["Output File","Disk","Wipe Data","Save Settings → Sure ?","Load Settings","Reset Settings"]
+        items=["Output File → JPG","Disk","Wipe Data","Save Settings → Sure ?","Load Settings","Reset Settings"]
+        if(camera_config["raw"]):
+            items[0] += " + RAW"
+        items[1] = items[1] + " → " + value
         menu_display("System Menu",items,display_config)
 
     elif( menu == 4444 ):                           # Save settings confirmation
-        items=["Output File","Disk","Wipe Data","Save Settings → Done !","Load Settings","Reset Settings"]
+        items=["Output File → JPG","Disk","Wipe Data","Save Settings → Done !","Load Settings","Reset Settings"]
+        if(camera_config["raw"]):
+            items[0] += " + RAW"
+        items[1] = items[1] + " → " + value
         menu_display("System Menu",items,display_config)
         time.sleep(1)
         items[3] = "Save Settings"
         menu_display("System Menu",items,display_config)
 
     elif( menu == 455 ):                            # Load settings
-        items=["Output File","Disk","Wipe Data","Save Settings","Load Settings → Sure ?","Reset Settings"]
+        items=["Output File → JPG","Disk","Wipe Data","Save Settings","Load Settings → Sure ?","Reset Settings"]
+        if(camera_config["raw"]):
+            items[0] += " + RAW"
+        items[1] = items[1] + " → " + value
         menu_display("System Menu",items,display_config)
 
     elif( menu == 4555 ):                           # Load settings confirmation
-        items=["Output File","Disk","Wipe Data","Save Settings","Load Settings → Done !","Reset Settings"]
+        items=["Output File → JPG","Disk","Wipe Data","Save Settings","Load Settings → Done !","Reset Settings"]
+        if(camera_config["raw"]):
+            items[0] += " + RAW"
+        items[1] = items[1] + " → " + value
         menu_display("System Menu",items,display_config)
         time.sleep(1)
         items[4] = "Load Settings"
         menu_display("System Menu",items,display_config)
 
     elif( menu == 466 ):                            # Load settings
-        items=["Output File","Disk","Wipe Data","Save Settings","Load Settings","Reset Settings → Sure ?"]
+        items=["Output File → JPG","Disk","Wipe Data","Save Settings","Load Settings","Reset Settings → Sure ?"]
+        if(camera_config["raw"]):
+            items[0] += " + RAW"
+        items[1] = items[1] + " → " + value
         menu_display("System Menu",items,display_config)
 
     elif( menu == 4666 ):                           # Load settings confirmation
-        items=["Output File","Disk","Wipe Data","Save Settings","Load Settings","Reset Settings → Done !"]
+        items=["Output File → JPG","Disk","Wipe Data","Save Settings","Load Settings","Reset Settings → Done !"]
+        if(camera_config["raw"]):
+            items[0] += " + RAW"
+        items[1] = items[1] + " → " + value
         menu_display("System Menu",items,display_config)
         time.sleep(1)
         items[5] = "Reset Settings"
