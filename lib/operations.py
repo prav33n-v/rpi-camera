@@ -88,13 +88,13 @@ def reset_settings():
 def reboot(display_config,shoot_config,camera_config):
     display_config["menu"] = 0
     save_settings(display_config,shoot_config,camera_config,"auto_saved")
-    display_config["menu"] = 5112
+    display_config["menu"] = 5223
     lcd.menu_control(display_config,shoot_config,camera_config)
-    display_config["menu"] = 5113
+    display_config["menu"] = 5224
     lcd.menu_control(display_config,shoot_config,camera_config)
-    display_config["menu"] = 5114
+    display_config["menu"] = 5225
     lcd.menu_control(display_config,shoot_config,camera_config)
-    lcd.boot_disp("camera_down_logo.jpeg")
+    lcd.boot_disp("reboot.jpg")
     time.sleep(1)
     os.system("sudo reboot")
     time.sleep(0.5)
@@ -136,18 +136,19 @@ def timelapse(display_config,shoot_config,camera_config,path):
         camera.shoot(camera_config,image_filename)
         time.sleep(shoot_config["tlv_interval"])
         lcd.progress_bar(image_filename+".jpg",x,shoot_config,camera_config,display_config)
+#    os.system("ffmpeg -r 1 -i TLV_%.jpg -vcodec mpeg4 -y movie.mp4")
     lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
     
 def poweroff(display_config,shoot_config,camera_config):
     display_config["menu"] = 0
     save_settings(display_config,shoot_config,camera_config,"auto_saved")
-    display_config["menu"] = 5223
+    display_config["menu"] = 5334
     lcd.menu_control(display_config,shoot_config,camera_config)
-    display_config["menu"] = 5224
+    display_config["menu"] = 5335
     lcd.menu_control(display_config,shoot_config,camera_config)
-    display_config["menu"] = 5225
+    display_config["menu"] = 5336
     lcd.menu_control(display_config,shoot_config,camera_config)
-    lcd.boot_disp("camera_down_logo.jpeg")
+    lcd.boot_disp("reboot.jpg")
     time.sleep(1)
     os.system("sudo poweroff")
     time.sleep(0.5)
@@ -159,7 +160,7 @@ def back_button(display_config,shoot_config,camera_config):
         display_config["menu"] = 0
         lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
     elif(display_config["menu"] == 0):
-        lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
+        camera_config["bnw"] = not camera_config["bnw"]
     else:
         if(display_config["menu"] > 0 and display_config["menu"] < 9):          # Back from main menu page to home screen
             display_config["menu"] = 0
@@ -226,6 +227,7 @@ def back_button(display_config,shoot_config,camera_config):
 
 def shutter_button(display_config,shoot_config,camera_config):
     if(display_config["menu"] == 0):     # Capture
+        display_config["busy"] = True
         if(shoot_config["shoot_mode"] == 1):  # Single shot
             if(os.path.exists(shoot_config["storage_path"] + "Photo/")):
                 print("Photo directory exists. Writing in directory...")
@@ -275,6 +277,7 @@ def ok_menu_button(display_config,shoot_config,camera_config):
         lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
     elif(display_config["menu"] == 0):
         display_config["menu"] = 1
+        time.sleep(0.5)
     elif(display_config["menu"] == 1):                                      # Select image settings from main menu page
         display_config["menu"] = 11
         display_config["left"] = display_config["right"] = True
@@ -387,7 +390,7 @@ def down_button(display_config,shoot_config,camera_config):
             display_config["menu"] = down(display_config["menu"],21,24) 
             shoot_config["shoot_mode"] = display_config["menu"] % 10
         elif(display_config["menu"] >= 31 and display_config["menu"] <=39):     # Interface settings page
-            display_config["menu"] = down(display_config["menu"],31,33)
+            display_config["menu"] = down(display_config["menu"],31,34)
         elif(display_config["menu"] >= 231 and display_config["menu"] <=239):   # Timelapse photo submenu
             display_config["menu"] = down(display_config["menu"],234,235) 
             if(display_config["menu"] == 234):
@@ -436,7 +439,7 @@ def up_button(display_config,shoot_config,camera_config):
             display_config["menu"] = up(display_config["menu"],21,24) 
             shoot_config["shoot_mode"] = display_config["menu"] % 10
         elif(display_config["menu"] >= 31 and display_config["menu"] <=39):     # Output settings page
-            display_config["menu"] = up(display_config["menu"],31,33)
+            display_config["menu"] = up(display_config["menu"],31,34)
         elif(display_config["menu"] >= 231 and display_config["menu"] <=239):   # Timelapse photo submenu
             display_config["menu"] = up(display_config["menu"],234,235)
             if(display_config["menu"] == 234):
@@ -536,8 +539,12 @@ def left_button(display_config,shoot_config,camera_config):
             if(camera_config["image_size"] > camera_config["min_image_size"]):
                 camera_config["image_size"] = decrement(camera_config["image_size"],1)
                 display_config["left"],display_config["right"] = check_left_right(camera_config["image_size"],camera_config["min_image_size"],camera_config["max_image_size"],0)
+        elif(display_config["menu"] == 34):
+            if(camera_config["wait_time"] > 1):
+                camera_config["wait_time"] = decrement(camera_config["wait_time"],0.5)
+                display_config["left"],display_config["right"] = check_left_right(camera_config["wait_time"],1,15,0)
         elif(display_config["menu"] == 17):                                     # Toggle bnw
-            camera_config["bnw"] = not camera_config["bnw"]
+            camera_config["raw"] = not camera_config["raw"]
         elif(display_config["menu"] == 41):                                     # Toggle raw
             camera_config["raw"] = not camera_config["raw"]
         elif(display_config["menu"] == 32):                                     # Toggle sound
@@ -615,8 +622,12 @@ def right_button(display_config,shoot_config,camera_config):
             if(camera_config["image_size"] < camera_config["max_image_size"]):
                camera_config["image_size"] = increment(camera_config["image_size"],1)
                display_config["left"],display_config["right"] = check_left_right(camera_config["image_size"],camera_config["min_image_size"],camera_config["max_image_size"],0)
+        elif(display_config["menu"] == 34):
+            if(camera_config["wait_time"] < 15):
+                camera_config["wait_time"] = increment(camera_config["wait_time"],0.5)
+                display_config["left"],display_config["right"] = check_left_right(camera_config["wait_time"],1,15,0)
         elif(display_config["menu"] == 17):                                     # Toggle bnw
-            camera_config["bnw"] = not camera_config["bnw"]
+            camera_config["raw"] = not camera_config["raw"]
         elif(display_config["menu"] == 41):                                     # Toggle raw
             camera_config["raw"] = not camera_config["raw"]
         elif(display_config["menu"] == 32):                                     # Toggle sound

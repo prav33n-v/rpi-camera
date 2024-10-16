@@ -306,7 +306,7 @@ def menu_control(display_config,shoot_config,camera_config):
         menu_display("Menu",items,display_config)
 
     elif( menu >= 11 and menu <= 19 ):        # Camera control settings
-        items=["Exposure","ISO","Contrast","Sharpness","Noise Reduction","AWB","Output","Size"]
+        items=["Exposure","ISO","Contrast","Sharpness","Noise Reduction","AWB","Output File → JPG","Size"]
         if(shoot_config["shoot_mode"] == 1):
             menu_page_title = "Photo Mode Setup"
         elif(shoot_config["shoot_mode"] == 2):
@@ -321,10 +321,8 @@ def menu_control(display_config,shoot_config,camera_config):
         items[3] = items[3] + " → " + str(camera_config["sharpness"])
         items[4] = items[4] + " → " + noise_reduction_mode[camera_config["noise_reduction"]]
         items[5] = items[5] + " → " + white_balance[camera_config["white_balance"]]
-        if(camera_config["bnw"]):
-            items[6] += " → B & W"
-        else:
-            items[6] += " → COLOR"
+        if(camera_config["raw"]):
+            items[6] += " + RAW"
         items[7] = items[7] + " → " + str(image_h[camera_config["image_size"]]) +" X " + str(image_w[camera_config["image_size"]])
         menu_display(menu_page_title,items,display_config)
 
@@ -350,7 +348,7 @@ def menu_control(display_config,shoot_config,camera_config):
         menu_display("Shooting Mode",items,display_config)
 
     elif( menu >= 31 and menu <= 39 ):        # Image Setting Menu
-        items=["Brightness","Sound","Status LED"]
+        items=["Brightness","Sound","Status LED","Playback Time → "]
         if(menu == 31):                             # Brightness Control
             items[0] = items[0] + " → " + str(display_config["brightness"])
         if(display_config["sound"]):
@@ -361,6 +359,7 @@ def menu_control(display_config,shoot_config,camera_config):
             items[2] += " → On"
         else:
             items[2] += " → Off"
+        items[3] += (str(camera_config["wait_time"]) + " Sec")
         menu_display("UI Menu",items,display_config)
 
     elif( menu >= 41 and menu <= 49 ):        # System Menu

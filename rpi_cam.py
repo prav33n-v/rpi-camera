@@ -4,6 +4,7 @@ import os
 import shutil
 import time
 import signal
+import threading
 import RPi.GPIO as GPIO
 from gpiozero import Button
 import lib.camera as camera
@@ -68,16 +69,34 @@ def buzz():
 def init(display_config,shoot_config,camera_config):
     backlight.start(1)
     set_LED()
-    lcd.boot_disp("start_logo.jpeg")
+    lcd.boot_disp("start.jpg")
     camera.initialize_camera(camera_config)
     display_sleep(display_config["brightness"],False)
     buzz()
     reset_LED()
 
-def end_program():
-    lcd.boot_disp("start_logo.jpeg")
+def end_program(image_name="reboot.jpg"):
+    lcd.boot_disp(image_name)
     camera.stop_camera()
     GPIO.cleanup()       # clean up GPIO on CTRL+C exit
+
+def lcd_viewfinder():
+    global display_config,shoot_config,camera_config
+    while(True):
+        if(display_config["menu"] == 0 and display_config["busy"] != True):
+            lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
+        elif(display_config["menu"] == 0 and display_config["busy"] == True):
+            if(shoot_config["shoot_mode"] == 0):
+                delay = camera_config["wait_time"] + camera_config["exposure"]
+            elif(shoot_config["shoot_mode"] == 1):
+                delay = camera_config["wait_time"] + (camera_config["exposure"]*shoot_config["bkt_frame_count"])
+            else:
+                delay = camera_config["wait_time"] + (camera_config["exposure"]*shoot_config["tlp_interval"]*shoot_config["tlp_frame_count"])
+            time.sleep(delay)
+            display_config["busy"] = not display_config["busy"]
+        else:
+            pass	# Do nothing
+        time.sleep(camera_config["refresh_time"])
 
 def key_input(input_value):
     global display_config,shoot_config,camera_config
@@ -141,6 +160,23 @@ def back():
 def menu():
     input_handler(1)
 
+def key_thread():
+    try:
+        UP.when_held = up
+        DOWN.when_held = down
+        LEFT.when_held = left
+        RIGHT.when_held  = right
+        SHUTTER.when_held = shutter
+        BACK.when_held = back
+        MENU.when_held = menu
+        signal.pause()
+    except:
+        print("Keyboard interrupt detected")
+        display_config["menu"] == 0
+        operation.save_settings(display_config,shoot_config,camera_config,"auto_saved")
+        print("Current settings saved")
+        end_program("crashed.jpg")
+
 ###############################################################################################################
 # main()
 ###############################################################################################################
@@ -149,22 +185,21 @@ def main():
     global display_config,shoot_config,camera_config,keypress
     display_config,shoot_config,camera_config = operation.load_settings("auto_saved")
     init(display_config,shoot_config,camera_config)
+    viewfinder_thread = threading.Thread(target=lcd_viewfinder)
+    key_input_thread =  threading.Thread(target=key_thread)
     try:
         lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
-        UP.when_held = up
-        DOWN.when_held = down
-        LEFT.when_held = left
-        RIGHT.when_held  = right
-        SHUTTER.when_held = shutter
-        BACK.when_held = back
-        MENU.when_held = menu
-        signal.pause()  
+        viewfinder_thread.start()
+        time.sleep(1)
+        key_input_thread.start()
     except KeyboardInterrupt:
+        viewfinder_thread.join()
+        key_input_thread.join()
         print("Keyboard interrupt detected")
         display_config["menu"] == 0
         operation.save_settings(display_config,shoot_config,camera_config,"auto_saved")
         print("Current settings saved")
-        end_program()
+        end_program("crashed.jpg")
 
 if __name__ == '__main__':
     main()
