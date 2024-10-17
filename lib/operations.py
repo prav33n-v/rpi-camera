@@ -129,16 +129,6 @@ def interval_timer(display_config,shoot_config,camera_config,path):
         lcd.progress_bar(image_filename+".jpg",x,shoot_config,camera_config,display_config)
     lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
 
-def timelapse(display_config,shoot_config,camera_config,path):
-    os.mkdir(path)
-    for x in range(shoot_config["tlv_frame_count"]):
-        image_filename=path+"TLV_"+str(x)
-        camera.shoot(camera_config,image_filename)
-        time.sleep(shoot_config["tlv_interval"])
-        lcd.progress_bar(image_filename+".jpg",x,shoot_config,camera_config,display_config)
-#    os.system("ffmpeg -r 1 -i TLV_%.jpg -vcodec mpeg4 -y movie.mp4")
-    lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
-    
 def poweroff(display_config,shoot_config,camera_config):
     display_config["menu"] = 0
     save_settings(display_config,shoot_config,camera_config,"auto_saved")
@@ -152,7 +142,6 @@ def poweroff(display_config,shoot_config,camera_config):
     time.sleep(1)
     os.system("sudo poweroff")
     time.sleep(0.5)
-
     
 def back_button(display_config,shoot_config,camera_config):
     if (display_config["menu"] == -1):
@@ -186,10 +175,6 @@ def back_button(display_config,shoot_config,camera_config):
 
         elif(display_config["menu"] >= 231 and display_config["menu"] <=239):   # Back from timelapse photo mode submenu to shooting mode page
             display_config["menu"] = 23
-            display_config["left"] = display_config["right"] = False
-
-        elif(display_config["menu"] >= 241 and display_config["menu"] <=249):   # Back from timelapse video mode submenu to shooting mode page
-            display_config["menu"] = 24
             display_config["left"] = display_config["right"] = False
 
         elif(display_config["menu"] > 30 and display_config["menu"] < 39):      # Back from image settings menu page to main menu page
@@ -253,14 +238,6 @@ def shutter_button(display_config,shoot_config,camera_config):
                 os.mkdir(shoot_config["storage_path"] +"IntervalTimer/")
             path = shoot_config["storage_path"]  + "IntervalTimer/TLS_" + str(timestr)+"/"
             interval_timer(display_config,shoot_config,camera_config,path)
-        elif(shoot_config["shoot_mode"] == 4): # Start Timelapse Movie shooting
-            timestr = time.strftime("%Y%m%d-%H%M%S")
-            if(os.path.exists(shoot_config["storage_path"] +"TimelapseMovie/")):
-                print("Writing in TimelapseMovie folder'")
-            else:
-                os.mkdir(shoot_config["storage_path"] +"TimelapseMovie/")
-            path = shoot_config["storage_path"]  + "TimelapseMovie/TLV_" + str(timestr)+"/"
-            timelapse(display_config,shoot_config,camera_config,path)
         lcd.menu_control(display_config,shoot_config,camera_config)
     elif((display_config["menu"] == -2) or (display_config["menu"] == -1)):
         pass
@@ -288,8 +265,6 @@ def ok_menu_button(display_config,shoot_config,camera_config):
             display_config["menu"] = 22
         if(shoot_config["shoot_mode"] == 3):
             display_config["menu"] = 23
-        if(shoot_config["shoot_mode"] == 4):
-            display_config["menu"] = 24 
     elif(display_config["menu"] == 22):                                     # Select bracketing mode from shooting mode page
         display_config["menu"] = 223
         display_config["left"] = display_config["right"] = True
@@ -306,17 +281,6 @@ def ok_menu_button(display_config,shoot_config,camera_config):
         else:
             display_config["left"] = True
         shoot_config["shoot_mode"]=3
-    elif(display_config["menu"] == 24):                                     # Select timelapse photo mode from shooting mode page
-        display_config["menu"] = 245
-        if(shoot_config["tlv_frame_count"] > 8):  
-            display_config["right"] = False
-        else:
-            display_config["right"] = True
-        if(shoot_config["tlv_frame_count"] < 4):  
-            display_config["left"] = False
-        else:
-            display_config["left"] = True
-        shoot_config["shoot_mode"]=4
     elif(display_config["menu"] == 3):                                      # Select image settings menu from main menu page
         display_config["menu"] = 31
     elif(display_config["menu"] == 4):                                      # Select system menu from main menu page
@@ -387,7 +351,7 @@ def down_button(display_config,shoot_config,camera_config):
         elif(display_config["menu"] >= 11 and display_config["menu"] <=19):     # Camera settings page
             display_config["menu"] = down(display_config["menu"],11,18) 
         elif(display_config["menu"] >= 21 and display_config["menu"] <=29):     # Shooting mode page
-            display_config["menu"] = down(display_config["menu"],21,24) 
+            display_config["menu"] = down(display_config["menu"],21,23) 
             shoot_config["shoot_mode"] = display_config["menu"] % 10
         elif(display_config["menu"] >= 31 and display_config["menu"] <=39):     # Interface settings page
             display_config["menu"] = down(display_config["menu"],31,34)
@@ -436,7 +400,7 @@ def up_button(display_config,shoot_config,camera_config):
         elif(display_config["menu"] >= 11 and display_config["menu"] <=19):     # Camera settings page
             display_config["menu"] = up(display_config["menu"],11,18) 
         elif(display_config["menu"] >= 21 and display_config["menu"] <=29):     # Shooting mode page
-            display_config["menu"] = up(display_config["menu"],21,24) 
+            display_config["menu"] = up(display_config["menu"],21,23) 
             shoot_config["shoot_mode"] = display_config["menu"] % 10
         elif(display_config["menu"] >= 31 and display_config["menu"] <=39):     # Output settings page
             display_config["menu"] = up(display_config["menu"],31,34)
@@ -527,14 +491,6 @@ def left_button(display_config,shoot_config,camera_config):
             if(shoot_config["tlp_interval"] > shoot_config["min_interval"]):
                 shoot_config["tlp_interval"] = decrement(shoot_config["tlp_interval"],1)
                 display_config["left"],display_config["right"] = check_left_right(shoot_config["tlp_interval"],shoot_config["min_interval"],shoot_config["max_interval"],0)
-        elif(display_config["menu"] == 245):                                    # Decrease Timelapse video frame count
-            if(shoot_config["tlv_frame_count"] > shoot_config["tlv_min_frame"]):
-                shoot_config["tlv_frame_count"] = decrement(shoot_config["tlv_frame_count"],30)
-                display_config["left"],display_config["right"] = check_left_right(shoot_config["tlv_frame_count"],shoot_config["tlv_min_frame"],shoot_config["tlv_max_frame"],15)
-        elif(display_config["menu"] == 246):                                    # Decrease Timelapse video interval count
-            if(shoot_config["tlv_interval"] > shoot_config["min_interval"]):
-                shoot_config["tlv_interval"] = decrement(shoot_config["tlv_interval"],1)
-                display_config["left"],display_config["right"] = check_left_right(shoot_config["tlv_interval"],shoot_config["min_interval"],shoot_config["max_interval"],0)
         elif(display_config["menu"] == 18):
             if(camera_config["image_size"] > camera_config["min_image_size"]):
                 camera_config["image_size"] = decrement(camera_config["image_size"],1)
@@ -610,14 +566,6 @@ def right_button(display_config,shoot_config,camera_config):
             if(shoot_config["tlp_interval"] < shoot_config["max_interval"]):
                 shoot_config["tlp_interval"] = increment(shoot_config["tlp_interval"],1)
                 display_config["left"],display_config["right"] = check_left_right(shoot_config["tlp_interval"],shoot_config["min_interval"],shoot_config["max_interval"],0)
-        elif(display_config["menu"] == 245):                                    # Increase Timelapse video frame count
-            if(shoot_config["tlv_frame_count"] < shoot_config["tlv_max_frame"]):
-                shoot_config["tlv_frame_count"] = increment(shoot_config["tlv_frame_count"],30)
-                display_config["left"],display_config["right"] = check_left_right(shoot_config["tlv_frame_count"],shoot_config["tlv_min_frame"],shoot_config["tlv_max_frame"],15)
-        elif(display_config["menu"] == 246):                                    # Increase Timelapse video interval count
-            if(shoot_config["tlv_interval"] < shoot_config["max_interval"]):
-                shoot_config["tlv_interval"] = increment(shoot_config["tlv_interval"],1)
-                display_config["left"],display_config["right"] = check_left_right(shoot_config["tlv_interval"],shoot_config["min_interval"],shoot_config["max_interval"],0)
         elif(display_config["menu"] == 18):
             if(camera_config["image_size"] < camera_config["max_image_size"]):
                camera_config["image_size"] = increment(camera_config["image_size"],1)

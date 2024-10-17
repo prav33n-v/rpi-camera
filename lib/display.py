@@ -102,15 +102,6 @@ def get_icon(icon_name,icon_color,camera_config):
             draw.polygon([(7,11),(7,17),(11,21),(17,21),(21,17),(21,11),(17,7),(11,7)], fill = icon_color)
         else:
             draw.polygon([(7,11),(7,17),(11,21),(17,21),(21,17),(21,11),(17,7),(11,7)], fill = WHITE)
-    elif(icon_name == "tlv"):
-        draw.rectangle((6,6,26,26), WHITE)
-        draw.rectangle((5,5,25,25), BLACK)
-        draw.rectangle((4,4,24,24), WHITE)
-        draw.rectangle((5,5,23,23), BLACK)
-        if (camera_config["raw"]):
-            draw.polygon([(9,9),(9,19),(19,14)], fill = icon_color)
-        else:
-            draw.polygon([(9,9),(9,19),(19,14)], fill = WHITE)
     elif(icon_name == "nr"):
         draw.rectangle((4,4,24,24), WHITE)
         draw.rectangle((5,5,23,23), BLACK)
@@ -174,12 +165,12 @@ def progress_bar(image_file,x,shoot_config,camera_config,display_config,backgrou
     draw.rectangle((290,22,317,22), 'red')
     draw.rectangle((1,1,317,21), BLACK)
     draw.rectangle((1,1,70,21), GRAY)
-    draw.text((0,0),("ISO "+str(int(camera_config["analogue_gain"] * 100))), fill = MENU_TEXT,font = home_info)
+    draw.text((2,0),("ISO "+str(int(camera_config["analogue_gain"] * 100))), fill = MENU_TEXT,font = home_info)
     draw.rectangle((73,1,145,21), GRAY)
     if(camera_config["exposure"] == 0):
-        draw.text((80,0),exposure_time[camera_config["exposure"]],fill = MENU_TITLE, font = home_info)
+        draw.text((75,0),exposure_time[camera_config["exposure"]],fill = MENU_TITLE, font = home_info)
     else:
-        draw.text((80,0),exposure_time[camera_config["exposure"]],fill = MENU_TEXT, font = home_info)
+        draw.text((75,0),exposure_time[camera_config["exposure"]],fill = MENU_TEXT, font = home_info)
     draw.rectangle((148,1,220,21), GRAY)
     if(camera_config["white_balance"] != 0 ):
         draw.text((150,0),"WB - "+(white_balance[camera_config["white_balance"]][0:3]), fill = MENU_TEXT,font = home_info)
@@ -258,8 +249,6 @@ def camera_home(display_config,shoot_config,camera_config,preview_image):
         image.paste(get_icon("bkt",GREEN,camera_config),(290,55))
     elif( shoot_config["shoot_mode"] == 3 ):              # mode 3 - timelapse stills
         image.paste(get_icon("int",GREEN,camera_config),(290,55))
-    elif( shoot_config["shoot_mode"] == 4 ):              # mode 4 - timelapse video
-        image.paste(get_icon("tlv",GREEN,camera_config),(290,55))
     if(camera_config["noise_reduction"] != 0):
         image.paste(get_icon("nr",GREEN,camera_config),(290,85))
     if(display_config["sound"]):
@@ -313,8 +302,6 @@ def menu_control(display_config,shoot_config,camera_config):
             menu_page_title = "Bracketing Mode Setup"
         elif(shoot_config["shoot_mode"] == 3):
             menu_page_title = "Interval Timer Setup"
-        elif(shoot_config["shoot_mode"] == 4):
-            menu_page_title = "Timelapse Movie Setup"
         items[0] = items[0] + " → " + exposure_time[camera_config["exposure"]]
         items[1] = items[1] + " → " + str(int(camera_config["analogue_gain"] * 100))
         items[2] = items[2] + " → " + str(camera_config["contrast"])
@@ -327,24 +314,18 @@ def menu_control(display_config,shoot_config,camera_config):
         menu_display(menu_page_title,items,display_config)
 
     elif( menu >= 21 and menu <= 29 ):        # Shooting mode
-        items=["Photo","Bracketing","Interval Timer Shoot","Timelapse Movie"]
+        items=["Photo","Bracketing","Interval Timer Shoot"]
         menu_display("Shooting Mode",items,display_config)
 
     elif( menu >= 222 and menu <= 229 ):      # Bracketing submenu
-        items=["Photo","Bracketing","* Frames","Interval Timer Shoot","Timelapse Movie"]
+        items=["Photo","Bracketing","* Frames","Interval Timer Shoot"]
         items[2]=items[2] + " → " + str(shoot_config["bkt_frame_count"])
         menu_display("Shooting Mode",items,display_config)
 
     elif( menu >= 233 and menu <= 239 ):      # Timelapse photo submenu
-        items=["Photo","Bracketing","Interval Timer Shoot","* Frames","* Interval","Timelapse Movie"]
+        items=["Photo","Bracketing","Interval Timer Shoot","* Frames","* Interval"]
         items[3]=items[3] + " → " + str(shoot_config["tlp_frame_count"])
         items[4]=items[4] + " → " + str(shoot_config["tlp_interval"])
-        menu_display("Shooting Mode",items,display_config)
-
-    elif( menu >= 244 and menu <= 249 ):      # Timelapse video submenu
-        items=["Photo","Bracketing","Interval Timer Shoot","Timeplapse Movie","* Frames","* Interval"]
-        items[4]=items[4] + " → " + str(shoot_config["tlv_frame_count"])
-        items[5]=items[5] + " → " + str(shoot_config["tlv_interval"])
         menu_display("Shooting Mode",items,display_config)
 
     elif( menu >= 31 and menu <= 39 ):        # Image Setting Menu

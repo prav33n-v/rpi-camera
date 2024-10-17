@@ -82,18 +82,9 @@ def end_program(image_name="reboot.jpg"):
 
 def lcd_viewfinder():
     global display_config,shoot_config,camera_config
-    while(True):
-        if(display_config["menu"] == 0 and display_config["busy"] != True):
+    while(True):	# Continuously show image preview on screen if busy flag is set to False
+        if(display_config["menu"] == 0 and display_config["busy"] == False):
             lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
-        elif(display_config["menu"] == 0 and display_config["busy"] == True):
-            if(shoot_config["shoot_mode"] == 0):
-                delay = camera_config["wait_time"] + camera_config["exposure"]
-            elif(shoot_config["shoot_mode"] == 1):
-                delay = camera_config["wait_time"] + (camera_config["exposure"]*shoot_config["bkt_frame_count"])
-            else:
-                delay = camera_config["wait_time"] + (camera_config["exposure"]*shoot_config["tlp_interval"]*shoot_config["tlp_frame_count"])
-            time.sleep(delay)
-            display_config["busy"] = not display_config["busy"]
         else:
             pass	# Do nothing
         time.sleep(camera_config["refresh_time"])
@@ -103,6 +94,7 @@ def key_input(input_value):
     if(input_value == 0):                                                             # BACK key
         if(display_config["menu"] == -1):
             display_sleep(display_config["brightness"],False)
+            display_config["busy"] = False
         display_config,shoot_config,camera_config = operation.back_button(display_config,shoot_config,camera_config)
 
     elif(input_value == 2):                                                           # Down key
@@ -129,36 +121,36 @@ def key_input(input_value):
             backlight.ChangeDutyCycle(display_config["brightness"])
         if(display_config["menu"] == -2):
             display_config["menu"] = -1
+            display_config["busy"] = True
             display_sleep(display_config["brightness"],True)
     else:										# SHUTTER KEY
         set_LED()
         display_config,shoot_config,camera_config = operation.shutter_button(display_config,shoot_config,camera_config)
         reset_LED()
         buzz()
-
-def input_handler(value):
-    key_input(value)
+        time.sleep(camera_config["wait_time"])
+        display_config["busy"] = not display_config["busy"]
 
 def down():
-    input_handler(2)
+    key_input(2)
 
 def up():
-    input_handler(3)
+    key_input(3)
 
 def left():
-    input_handler(4)
+    key_input(4)
 
 def right():
-    input_handler(5)
+    key_input(5)
 
 def shutter():
-    input_handler(7)
+    key_input(7)
 
 def back():
-    input_handler(0)
+    key_input(0)
 
 def menu():
-    input_handler(1)
+    key_input(1)
 
 def key_thread():
     try:
