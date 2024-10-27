@@ -41,7 +41,8 @@ exposure_time=[0,625,800,1000,1250,1562,2000,2500,3125,4000,5000,6250,8000,10000
 image_height=[1600,2048,2464,3008,3264,3888,4000,4656]
 image_width=[1200,1536,1632,2000,2448,2592,2800,3496]
 # Key input delay
-wait = 0.5
+wait = 0.25
+standby_counter = 0
 
 def display_sleep(brightness,sleep):
     if(sleep):
@@ -80,6 +81,17 @@ def end_program(image_name="reboot.jpg"):
     camera.stop_camera()
     GPIO.cleanup()       # clean up GPIO on CTRL+C exit
 
+def standby():
+    global display_config,shoot_config,camera_config,standby_counter
+    while True:
+        if (display_config["menu"] != -1 and display_config["busy"] == False):
+            while( standby_counter < display_config["standby_time"]):
+                time.sleep(1)
+                standby_counter += 1
+            display_config["menu"] = -1
+            camera.stop_camera()
+            display_sleep(display_config["brightness"],True)
+
 def lcd_viewfinder():
     global display_config,shoot_config,camera_config
     while(True):	# Continuously show image preview on screen if busy flag is set to False
@@ -93,6 +105,7 @@ def key_input(input_value):
     global display_config,shoot_config,camera_config
     if(input_value == 0):                                                             # BACK key
         if(display_config["menu"] == -1):
+            camera.initialize_camera(camera_config)
             display_sleep(display_config["brightness"],False)
             display_config["busy"] = False
         display_config,shoot_config,camera_config = operation.back_button(display_config,shoot_config,camera_config)
@@ -122,6 +135,7 @@ def key_input(input_value):
         if(display_config["menu"] == -2):
             display_config["menu"] = -1
             display_config["busy"] = True
+            camera.stop_camera()
             display_sleep(display_config["brightness"],True)
     else:										# SHUTTER KEY
         set_LED()
@@ -132,24 +146,38 @@ def key_input(input_value):
         display_config["busy"] = not display_config["busy"]
 
 def down():
+    global standby_counter
+    standby_counter = 0
     key_input(2)
 
 def up():
+    global standby_counter
+    standby_counter = 0
     key_input(3)
 
 def left():
+    global standby_counter
+    standby_counter = 0
     key_input(4)
 
 def right():
+    global standby_counter
+    standby_counter = 0
     key_input(5)
 
 def shutter():
+    global standby_counter
+    standby_counter = 0
     key_input(7)
 
 def back():
+    global standby_counter
+    standby_counter = 0
     key_input(0)
 
 def menu():
+    global standby_counter
+    standby_counter = 0
     key_input(1)
 
 def key_thread():
@@ -174,19 +202,23 @@ def key_thread():
 ###############################################################################################################
 
 def main():
-    global display_config,shoot_config,camera_config,keypress
+    global display_config,shoot_config,camera_config,keypress,standby_counter
     display_config,shoot_config,camera_config = operation.load_settings("auto_saved")
     init(display_config,shoot_config,camera_config)
     viewfinder_thread = threading.Thread(target=lcd_viewfinder)
     key_input_thread =  threading.Thread(target=key_thread)
+    standby_mode_thread = threading.Thread(target=standby)
     try:
         lcd.camera_home(display_config,shoot_config,camera_config,camera.shoot_preview(camera_config))
         viewfinder_thread.start()
         time.sleep(1)
         key_input_thread.start()
+        time.sleep(1)
+        standby_mode_thread.start()
     except KeyboardInterrupt:
         viewfinder_thread.join()
         key_input_thread.join()
+        standby_mode_thread.join()
         print("Keyboard interrupt detected")
         display_config["menu"] == 0
         operation.save_settings(display_config,shoot_config,camera_config,"auto_saved")
