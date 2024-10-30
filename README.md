@@ -3,11 +3,7 @@
 ## Description
 This is a project to make a Infrared light sensitive point and shoot camera using Raspberry Pi, microSD card, usb card reader, SPI display, a few switches and a camera module (for this build I have used Arducam 16MP NoIR Camera).
 
-## Author and acknowledgment
-```
-Author : Praveen Verma
-```
-Acknowledgement
+## Acknowledgment
 ```
 - To write the code for this project I have referred and used the sample codes available online to understand how the hardware works. Below are the codes I referred and used to develop this project :
    - Referred to <b>gpiozero</b> library documentation for key interface - https://readthedocs.org/projects/gpiozero/downloads/pdf/stable/
