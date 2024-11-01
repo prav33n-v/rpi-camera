@@ -85,12 +85,13 @@ def standby():
     global display_config,shoot_config,camera_config,standby_counter
     while True:
         if (display_config["menu"] != -1 and display_config["busy"] == False):
-            while( standby_counter < display_config["standby_time"]):
+            if( standby_counter < display_config["standby_time"]):
                 time.sleep(1)
                 standby_counter += 1
-            display_config["menu"] = -1
-            camera.stop_camera()
-            display_sleep(display_config["brightness"],True)
+            else:
+                display_config["menu"] = -1
+                camera.stop_camera()
+                display_sleep(display_config["brightness"],True)
 
 def lcd_viewfinder():
     global display_config,shoot_config,camera_config
