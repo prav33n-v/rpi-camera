@@ -4,13 +4,13 @@
 This is a project to make a Infrared light sensitive point and shoot camera using Raspberry Pi, microSD card, usb card reader, SPI display, a few switches and a camera module (for this build I have used Arducam 16MP NoIR Camera).
 
 ## Acknowledgment
-To write the code for this project I have referred and used the sample codes available online to understand how the hardware works. Below are the codes I referred and used to develop this project :
-   - Referred to <b>gpiozero</b> library documentation for key interface - https://readthedocs.org/projects/gpiozero/downloads/pdf/stable/
-   - I have used the LCD driver code(<b>lib/lcdconfig.py</b> and <b>lib/LCD_2inch.py</b>) and <b>fonts</b> from the Waveshare's LCD_Module_RPI_code - https://www.waveshare.com/w/upload/a/a8/LCD_Module_RPI_code.7z
+To write the code for this project, I have referred and used the sample codes available online to understand how the hardware works. Below are the codes I referred and used to develop this project :
+   - <b>Picamera2 datasheet</b> - https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf 
+   - Documentation for <b>gpiozero</b> librar - https://readthedocs.org/projects/gpiozero/downloads/pdf/stable/
+   - Copied LCD driver code(<b>lib/lcdconfig.py</b> and <b>lib/LCD_2inch.py</b>) and <b>fonts</b> from the Waveshare's LCD_Module_RPI_code - https://www.waveshare.com/w/upload/a/a8/LCD_Module_RPI_code.7z
 
 ## Installation & Setup
 At the time of building this project, I have used Raspbian Pi OS (32bit) distro.
-
 ```
   pi@rpi-camera:~ $ cat /etc/*release
   PRETTY_NAME="Raspbian GNU/Linux 12 (bookworm)"
@@ -25,7 +25,7 @@ At the time of building this project, I have used Raspbian Pi OS (32bit) distro.
   BUG_REPORT_URL="http://www.raspbian.org/RaspbianBugs"
 ```
 
-### Initial Software setup
+### Software setup
  -  Configuring raspberry pi by running
 ```
 sudo raspi-config
@@ -114,14 +114,12 @@ sudo systemctl restart smbd
 ```
 
 ### Run scripts for Arducam 16MP NoIR Camera module
-
 If you are using any other camera module then you do not need to do this setup. If you are using the mentioned camera module then you can install the same by following up the instructions from camera module manufacturer.
  - For this project, a camera module with Sony IMX519 sensor is used. The documentation is availabe at https://docs.arducam.com/Raspberry-Pi-Camera/Native-camera/16MP-IMX519/#supported-platforms-and-os
  - Reboot your raspberry pi.
  - Once your camera is connected correctly, run command <b>libcamera-still -o test.jpeg</b> to check if you are able to capture image. 
 
 ### Display Setup
-
 For this project, 2 inch LCD display from Waveshare is used with resolution of 240x320. The documentation is available at https://www.waveshare.com/wiki/2inch_LCD_Module
 ```
 sudo apt-get update
@@ -134,7 +132,6 @@ sudo mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MA
 ```
 
 ## Setup crontab to automatically run the camera code
-
  - To start the program on boot, add the below line to your crontab by running <b> sudo crontab -e </b> after replacing the path with <location> to rpi_cam.py file
 ```
 @reboot cd < location > ; python3 rpi_cam.py
