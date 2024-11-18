@@ -5,6 +5,7 @@ import os
 import sys 
 import time
 import logging
+import random
 import spidev as SPI
 #sys.path.append("..")
 import RPi.GPIO as GPIO
@@ -33,15 +34,18 @@ image_w=[1200,1536,1632,2000,2448,2592,2800,3496]
 
 noise_reduction_mode = ("OFF","FAST","QUALITY")
 white_balance = ("AUTO","TUNGSTEN","RADIANT","INDOOR","DAYLIGHT","CLOUDY")
+picture_control = ("Standard","Grayscale","Sepia","Technicolor")
 
 # Define colors
-RED=(255,0,0)
+RED=(200,0,0)
 GREEN=(0,200,0)
+BLUE=(0,0,255)
 BLACK=(0,0,0)
 GRAY=(120,120,120)
 INFO=(200,200,175)
 WHITE=(255,255,255)
 YELLOW=(255,255,0)
+SEPIA=(150,110,75)
 MENU_SELECT=(200,200,200)
 MENU_TEXT=(250,250,120)
 MENU_TITLE=(128,255,10)
@@ -68,15 +72,26 @@ def get_icon(icon_name,icon_color,camera_config):
         draw.rectangle((16,10,16,19), icon_color) 
         draw.rectangle((18,8,18,21), icon_color) 
         draw.rectangle((20,6,20,22), icon_color) 
-    elif(icon_name == "clr"):
+    elif(icon_name == "Standard"):
+        draw.rectangle((4,4,24,24), WHITE)
+        draw.rectangle((5,5,23,23), BLACK)
+        draw.rectangle((6,6,22,22), WHITE)
+        draw.polygon([(6,6),(6,16),(16,6)], fill = RED)
+        draw.polygon([(22,12),(12,22),(22,22)], fill = GREEN)
+    elif(icon_name == "Grayscale"):
         draw.rectangle((4,4,24,24), WHITE)
         draw.rectangle((5,5,23,23), BLACK)
         draw.polygon([(6,6),(6,22),(22,6)], fill = WHITE)
-        draw.polygon([(6,22),(22,6),(22,22)], fill = icon_color)
-    elif(icon_name == "bnw"):
+    elif(icon_name == "Sepia"):
+        draw.rectangle((4,4,24,24), WHITE)
+        draw.rectangle((5,5,23,23), SEPIA)
+        draw.polygon([(6,6),(6,22),(22,6)], fill = YELLOW)
+    elif(icon_name == "Technicolor"):
         draw.rectangle((4,4,24,24), WHITE)
         draw.rectangle((5,5,23,23), BLACK)
-        draw.polygon([(6,6),(6,22),(22,6)], fill = WHITE)
+        draw.rectangle((6,6,22,11), fill = RED)
+        draw.rectangle((6,12,22,17), fill = GREEN)
+        draw.rectangle((6,18,22,22), fill = BLUE)
     elif(icon_name == "pic"):
         draw.rectangle((4,4,24,24), WHITE)
         draw.rectangle((5,5,23,23), BLACK)
@@ -137,18 +152,15 @@ def progress_bar(image_file,x,shoot_config,camera_config,display_config,backgrou
     wpercent = (basewidth/float(image.size[0]))
     hsize = int((float(image.size[1])*float(wpercent)))
     preview_image= image.resize((288,216), resample=Image.BICUBIC)
-    outline=Image.new("RGB",(319,240),color='red')
+    outline=Image.new("RGB",(320,240),color='red')
     outline.paste(preview_image,(1,23))
     image=Image.new("RGB",(width,height),color='black')
     image.paste(outline,(0,0))
     draw = ImageDraw.Draw(image)
     # Draw a handy on-screen bar to show us the current brightness
     info_color = MENU_TITLE
-    draw.rectangle((290,23,317,238), GRAY)
-    if(camera_config["bnw"]):
-        image.paste(get_icon("bnw",BLACK,camera_config),(290,25))
-    else:
-        image.paste(get_icon("clr",RED,camera_config),(290,25))
+    draw.rectangle((290,23,318,238), GRAY)
+    image.paste(get_icon(picture_control[camera_config["picture_control"]],BLACK,camera_config),(290,25))
     if( shoot_config["shoot_mode"] == 2 ):              # mode 2 - bracketing
         image_count = shoot_config["bkt_frame_count"]
         image.paste(get_icon("bkt",GREEN,camera_config),(290,55))
@@ -162,8 +174,8 @@ def progress_bar(image_file,x,shoot_config,camera_config,display_config,backgrou
         image.paste(get_icon("nr",GREEN,camera_config),(290,85))
     if(display_config["sound"]):
         image.paste(get_icon("sound",RED,camera_config),(290,210))
-    draw.rectangle((290,22,317,22), 'red')
-    draw.rectangle((1,1,317,21), BLACK)
+    draw.rectangle((290,22,318,22), 'red')
+    draw.rectangle((1,1,318,21), BLACK)
     draw.rectangle((1,1,70,21), GRAY)
     draw.text((2,0),("ISO "+str(int(camera_config["analogue_gain"] * 100))), fill = MENU_TEXT,font = home_info)
     draw.rectangle((73,1,145,21), GRAY)
@@ -176,10 +188,8 @@ def progress_bar(image_file,x,shoot_config,camera_config,display_config,backgrou
         draw.text((150,0),"WB - "+(white_balance[camera_config["white_balance"]][0:3]), fill = MENU_TEXT,font = home_info)
     else:
         draw.text((150,0),"AWB", fill = MENU_TEXT,font = home_info)
-    draw.rectangle((223,1,270,21), GRAY)
-    draw.text((225,0),("C "+str(float(camera_config["contrast"]))), fill = MENU_TEXT,font = home_info)
-    draw.rectangle((273,1,317,21), GRAY)
-    draw.text((275,0),("S "+str(float(camera_config["sharpness"]))), fill = MENU_TEXT,font = home_info)
+    draw.rectangle((223,1,318,21), GRAY)
+    draw.text((225,0),("CON "+str(float(camera_config["contrast"]))), fill = MENU_TEXT,font = home_info)
     draw.text((5,215),"Processing → "+str(x+1)+" / "+str(image_count), fill = YELLOW,font = home_info)
 
     value = int(((x+1)/image_count)*100)
@@ -232,17 +242,14 @@ def menu_display(header,menu_item,display_config,bar_value=0):
 
 def camera_home(display_config,shoot_config,camera_config,preview_image):
     preview_image= preview_image.resize((288,216), resample=Image.BICUBIC)
-    outline=Image.new("RGB",(319,240),color='white')
+    outline=Image.new("RGB",(320,240),color='white')
     outline.paste(preview_image,(1,23))
     image=Image.new("RGB",(width,height),color='black')
     image.paste(outline,(0,0))
     draw = ImageDraw.Draw(image)
     info_color = MENU_TITLE
-    draw.rectangle((290,23,317,238), GRAY)
-    if(camera_config["bnw"]):
-        image.paste(get_icon("bnw",BLACK,camera_config),(290,25))
-    else:
-        image.paste(get_icon("clr",RED,camera_config),(290,25))
+    draw.rectangle((290,23,318,238), GRAY)
+    image.paste(get_icon(picture_control[camera_config["picture_control"]],BLACK,camera_config),(290,25))
     if( shoot_config["shoot_mode"] == 1 ):                # mode 1 - stills
         image.paste(get_icon("pic",GREEN,camera_config),(290,55))
     elif( shoot_config["shoot_mode"] == 2 ):              # mode 2 - bracketing
@@ -253,8 +260,8 @@ def camera_home(display_config,shoot_config,camera_config,preview_image):
         image.paste(get_icon("nr",GREEN,camera_config),(290,85))
     if(display_config["sound"]):
         image.paste(get_icon("sound",RED,camera_config),(290,210))
-    draw.rectangle((290,22,317,22), 'white')
-    draw.rectangle((1,1,317,21), BLACK)
+    draw.rectangle((290,22,318,22), 'white')
+    draw.rectangle((1,1,318,21), BLACK)
     draw.rectangle((1,1,70,21), GRAY)
     draw.text((2,0),("ISO "+str(int(camera_config["analogue_gain"] * 100))), fill = MENU_TEXT,font = home_info)
     draw.rectangle((73,1,145,21), GRAY)
@@ -267,10 +274,8 @@ def camera_home(display_config,shoot_config,camera_config,preview_image):
         draw.text((150,0),"WB - "+(white_balance[camera_config["white_balance"]][0:3]), fill = MENU_TEXT,font = home_info)
     else:
         draw.text((150,0),"AWB", fill = MENU_TEXT,font = home_info)
-    draw.rectangle((223,1,270,21), GRAY)
-    draw.text((225,0),("C "+str(float(camera_config["contrast"]))), fill = MENU_TEXT,font = home_info)
-    draw.rectangle((273,1,317,21), GRAY)
-    draw.text((275,0),("S "+str(float(camera_config["sharpness"]))), fill = MENU_TEXT,font = home_info)
+    draw.rectangle((223,1,318,21), GRAY)
+    draw.text((225,0),("CON "+str(float(camera_config["contrast"]))), fill = MENU_TEXT,font = home_info)
     disp.ShowImage(image)
 
 def get_disk_usage(shoot_config):
@@ -295,7 +300,7 @@ def menu_control(display_config,shoot_config,camera_config):
         menu_display("Menu",items,display_config)
 
     elif( menu >= 11 and menu <= 19 ):        # Camera control settings
-        items=["Exposure","ISO","Contrast","Sharpness","Noise Reduction","AWB","Output File → JPG","Size"]
+        items=["Exposure","ISO","Contrast","Sharpness","Noise Reduction","AWB","Picture Control","Size"]
         if(shoot_config["shoot_mode"] == 1):
             menu_page_title = "Photo Mode Setup"
         elif(shoot_config["shoot_mode"] == 2):
@@ -308,8 +313,7 @@ def menu_control(display_config,shoot_config,camera_config):
         items[3] = items[3] + " → " + str(camera_config["sharpness"])
         items[4] = items[4] + " → " + noise_reduction_mode[camera_config["noise_reduction"]]
         items[5] = items[5] + " → " + white_balance[camera_config["white_balance"]]
-        if(camera_config["raw"]):
-            items[6] += " + RAW"
+        items[6] = items[6] + " → " + picture_control[camera_config["picture_control"]]
         items[7] = items[7] + " → " + str(image_h[camera_config["image_size"]]) +" X " + str(image_w[camera_config["image_size"]])
         menu_display(menu_page_title,items,display_config)
 
