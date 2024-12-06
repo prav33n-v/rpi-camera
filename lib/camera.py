@@ -33,19 +33,19 @@ def shoot_preview(camera_config):
 
 def shoot(camera_config,image_filename):
     r = picam2.capture_request(flush=True)
-    r.save("main",image_filename+".jpg")
     if (camera_config["raw"]):       # Save dng RAW file if flag set to True
         r.save_dng(image_filename+".dng")
-    r.release()
     if (camera_config["picture_control"] != 0):
-        image=Image.open(image_filename+".jpg")
         if(camera_config["picture_control"] == 1):
-            image=pi.infrared_to_bnw_vintage(image)
+            image=pi.infrared_to_bnw_vintage(r.make_image("main"))
         elif(camera_config["picture_control"] == 2):
-            image=pi.sepia(image)
+            image=pi.sepia(r.make_image("main"))
         elif(camera_config["picture_control"] == 3):
-            image=pi.technicolor(image)
+            image=pi.technicolor(r.make_image("main"))
         image.save(image_filename+".jpg")
+    else:
+        r.save("main",image_filename+".jpg")
+    r.release()
 
 def stop_camera():
     picam2.stop()
